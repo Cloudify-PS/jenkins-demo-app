@@ -1,0 +1,43 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  Deploys a simple HTML file to NodeJS.
+
+imports:
+  - http://cloudify.co/spec/cloudify/5.0.0/types.yaml
+
+inputs:
+  infra_deployment_id:
+    type: string
+  app_content:
+    type: string
+
+node_templates:
+  nodejs_environment:
+    type: cloudify.nodes.Component
+    properties:
+      resource_config:
+        deployment:
+          id: { get_input: infra_deployment_id }
+          external_resource: true
+
+  app_content:
+    type: cloudify.nodes.ApplicationModule
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: scripts/ftp-upload.sh
+          executor: central_deployment_agent
+          inputs:
+            username: { get_capability: [ { get_attribute: [ nodejs_environment, deployment, id ] }, username ] }
+            password: { get_capability: [ { get_attribute: [ nodejs_environment, deployment, id ] }, password ] }
+            endpoint: { get_capability: [ { get_attribute: [ nodejs_environment, deployment, id ] }, endpoint ] }
+            resource_path: { get_input: app_content }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: nodejs_environment
+
+outputs:
+  base_url:
+    description: Application URL
+    value: { get_capability: [ { get_attribute: [ nodejs_environment, deployment, id ] }, base_url ] }
