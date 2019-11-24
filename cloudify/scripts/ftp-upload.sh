@@ -1,2 +1,2 @@
 #!/bin/bash -e
-lftp -e "mput ${resource_path}/*" -u ${username},${password} ${endpoint}
+lftp -e "put ${resource_path}/index.html" -u ${username},${password} ${endpoint}

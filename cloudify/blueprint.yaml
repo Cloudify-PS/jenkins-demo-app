@@ -14,12 +14,11 @@ inputs:
 
 node_templates:
   nodejs_environment:
-    type: cloudify.nodes.Component
+    type: cloudify.nodes.SharedResource
     properties:
       resource_config:
         deployment:
           id: { get_input: infra_deployment_id }
-          external_resource: true
 
   app_content:
     type: cloudify.nodes.ApplicationModule
